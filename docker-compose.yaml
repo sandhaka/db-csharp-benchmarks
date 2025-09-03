@@ -33,6 +33,20 @@ services:
       - scylladb_data:/var/lib/scylla
     restart: unless-stopped
 
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Password$4
+      MSSQL_PID: Express
+    volumes:
+      - mssql_data:/var/opt/mssql
+    restart: unless-stopped
+
 volumes:
   mongodb_data:
   scylladb_data:
+  mssql_data:

@@ -7,11 +7,11 @@ namespace db_bmk.benchmarks;
 [MemoryDiagnoser]
 public class MsSQL : Base
 {   
-    private const string ConnectionString = "Data Source=NBCH339;Persist Security Info=True;Password=Password$4;User ID=sa;Initial Catalog=Board_Local;TrustServerCertificate=true;Encrypt=false;MultipleActiveResultSets=true;";
+    private const string ConnectionString = "Data Source=localhost;Persist Security Info=True;Password=Password$4;User ID=sa;Initial Catalog=Board_Local;TrustServerCertificate=true;Encrypt=false;MultipleActiveResultSets=true;";
     private const string InsertStatement = "INSERT INTO testdata (name, value) VALUES (@name, @value);";
     private const string ReadStatement = "SELECT * FROM testdata WHERE value = @value;";
 
-    [GlobalSetup]
+    [GlobalSetup(Targets = new[] { nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)})]
     public void Setup()
     {
         using var connection = new SqlConnection(ConnectionString);
@@ -44,14 +44,14 @@ public class MsSQL : Base
         connection.Close();
     }
 
-    [GlobalCleanup]
+    [GlobalCleanup(Targets = new[] {nameof(EvalQueryAsync)})]
     public void Cleanup()
     {
         using var connection = new SqlConnection(ConnectionString);
         connection.Open();
+        connection.ChangeDatabase("benchmark");
 
         using var dropCmd = new SqlCommand("DROP TABLE IF EXISTS testdata;", connection);
-
         dropCmd.ExecuteNonQuery();
 
         connection.Close();
@@ -67,12 +67,13 @@ public class MsSQL : Base
 
     [Benchmark]
     [BenchmarkCategory("Read")]
-    public async Task<object> EvalQueryAsync() => await MainReadLoopAsync(Read);
+    public async Task<object?> EvalQueryAsync() => await MainReadLoopAsync(Read);
 
     private async Task Insert(int i, int count)
     {
         using var connection = new SqlConnection(ConnectionString);
         connection.Open();
+
         connection.ChangeDatabase("benchmark");
 
         var insertCommand = new SqlCommand(InsertStatement, connection);
@@ -84,7 +85,8 @@ public class MsSQL : Base
         {
             insertCommand.Parameters["@name"].Value = string.Empty;
             insertCommand.Parameters["@value"].Value = c;
-            await insertCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+            var result = await insertCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+            if (result <= 0) throw new InvalidOperationException("Write failure");
         }
 
         connection.Close();
@@ -107,7 +109,8 @@ public class MsSQL : Base
         {
             insertCommand.Parameters["@name"].Value = string.Empty;
             insertCommand.Parameters["@value"].Value = c;
-            await insertCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+            var result = await insertCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+            if (result <= 0) throw new InvalidOperationException("Write failure");
         }
 
         await transaction.CommitAsync().ConfigureAwait(false);
@@ -115,7 +118,7 @@ public class MsSQL : Base
         connection.Close();
     }
 
-    private async Task<object> Read(int i)
+    private async Task<object?> Read(int i)
     {
         using var readConnection = new SqlConnection(ConnectionString);
         await readConnection.OpenAsync().ConfigureAwait(false);

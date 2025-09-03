@@ -6,8 +6,8 @@ public abstract class Base
 {
     protected const int MaxConcurrencyLevel = 12;
 
-    [Params(100, 1000, 10000)]
-    public int NumInserts { get; set; }
+    [Params(10, 100, 1000)]
+    public int NumInserts { get; set; } = 10;
 
     protected int NumQueries => NumInserts / 2;
 
@@ -33,7 +33,6 @@ public abstract class Base
 
     protected async Task<List<object?>> MainReadLoopAsync(Func<int, Task<object?>> read)
     {
-        var random = new Random();
         var tasks = new List<Task<object?>>();
         var maxCount = (int) Math.Ceiling((double)NumQueries / MaxConcurrencyLevel);
         var k = 0;

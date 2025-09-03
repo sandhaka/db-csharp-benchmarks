@@ -14,7 +14,7 @@ public class Scylla : Base
     private const string InsertStatement = "INSERT INTO benchmarkkeyspace.testdata (id, name, value) VALUES (uuid(), ?, ?);";
     private const string ReadStatement = "SELECT * FROM benchmarkkeyspace.testdata WHERE value = ?;";
 
-    [GlobalSetup]
+    [GlobalSetup(Targets = new[] { nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)})]
     public void Setup()
     {
         _cluster = Cluster.Builder()
@@ -50,7 +50,7 @@ public class Scylla : Base
         _rs = _session.Prepare(ReadStatement);
     }
 
-    [GlobalCleanup]
+    [GlobalCleanup(Targets = new[] {nameof(EvalQueryAsync)})]
     public void Cleanup()
     {
         _session.Execute(new SimpleStatement("DROP KEYSPACE IF EXISTS benchmarkkeyspace;"));

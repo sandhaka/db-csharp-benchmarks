@@ -1,5 +1,4 @@
 using BenchmarkDotNet.Attributes;
-using db_bmk.benchmarks;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -11,7 +10,7 @@ public class Mongo : Base
     private IMongoCollection<BsonDocument> _collection;
     private IMongoClient _client;
 
-    [GlobalSetup]
+    [GlobalSetup(Targets = new[] { nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)})]
     public void Setup()
     {
         var settings = new MongoClientSettings
@@ -36,7 +35,7 @@ public class Mongo : Base
         );
     }
 
-    [GlobalCleanup]
+    [GlobalCleanup(Targets = new[] {nameof(EvalQueryAsync)})]
     public void Cleanup()
     {
         _client.GetDatabase("benchmark").DropCollection("keyvaluecollection");
