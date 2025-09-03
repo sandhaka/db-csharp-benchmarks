@@ -1,0 +1,38 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug Benchmark (Debug Mode)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-debug",
+            "program": "${workspaceFolder}/db_bmk/bin/Debug/net9.0/db_bmk.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/db_bmk",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Debug"
+            }
+        },
+        {
+            "name": "Run Benchmark (Release Mode)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-release",
+            "program": "${workspaceFolder}/db_bmk/bin/Release/net9.0/db_bmk.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/db_bmk",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "justMyCode": false
+        },
+        {
+            "name": "Debug Benchmark (Attach to Process)",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        }
+    ]
+}

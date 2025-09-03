@@ -1,0 +1,38 @@
+
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    command: >
+      mongod
+      --wiredTigerCacheSizeGB 1
+      --wiredTigerCollectionBlockCompressor snappy
+      --wiredTigerJournalCompressor snappy
+      --wiredTigerEngineConfigString cache_size=1GB
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+  scylladb:
+    image: scylladb/scylla:latest
+    container_name: scylladb
+    ports:
+      - "9042:9042"     # CQL
+      - "9160:9160"     # Thrift
+      - "10000:10000"   # REST API
+    command: >
+      --smp 2
+      --memory 2G
+      --overprovisioned 1
+    volumes:
+      - scylladb_data:/var/lib/scylla
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  scylladb_data:
