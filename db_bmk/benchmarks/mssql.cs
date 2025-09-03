@@ -22,7 +22,6 @@ public class MsSQL : Base
             CREATE DATABASE benchmark;", connection);
         createDbCmd.ExecuteNonQuery();
 
-
         connection.ChangeDatabase("benchmark");
 
         using var dropCmd = new SqlCommand(@"

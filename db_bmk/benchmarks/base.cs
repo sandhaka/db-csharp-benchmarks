@@ -14,7 +14,7 @@ public abstract class Base
     protected async Task MainInsertsLoopAsync(Func<int, int, Task> insert)
     {
         var tasks = new List<Task>();
-        var maxCount = (int)Math.Ceiling((double)NumInserts / MaxConcurrencyLevel);
+        var maxCount = (int) Math.Ceiling((double)NumInserts / MaxConcurrencyLevel);
         var k = 0;
 
         while (k < NumInserts)
@@ -35,7 +35,7 @@ public abstract class Base
     {
         var random = new Random();
         var tasks = new List<Task<object?>>();
-        var maxCount = (int)Math.Ceiling((double)NumQueries / MaxConcurrencyLevel);
+        var maxCount = (int) Math.Ceiling((double)NumQueries / MaxConcurrencyLevel);
         var k = 0;
 
         while (k < NumQueries)
@@ -45,7 +45,7 @@ public abstract class Base
             if (k + maxCount > NumQueries)
                 inc = NumQueries - k;
 
-            tasks.Add(read(random.Next(k, k + inc)));
+            tasks.Add(read(k));
             k += inc;
         }
 
