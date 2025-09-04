@@ -10,8 +10,8 @@ public class Mongo : Base
     private IMongoCollection<BsonDocument> _collection;
     private IMongoClient _client;
 
-    [GlobalSetup(Targets = new[] { nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)})]
-    public void Setup()
+    [GlobalSetup(Targets = [nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)])]
+    public void SetupInsert()
     {
         var settings = new MongoClientSettings
         {
@@ -35,10 +35,21 @@ public class Mongo : Base
         );
     }
 
-    [GlobalCleanup(Targets = new[] {nameof(EvalQueryAsync)})]
+    [GlobalSetup(Targets = [nameof(EvalQueryAsync)])]
+    public void SetupRead()
+    {
+        var settings = new MongoClientSettings
+        {
+            Server = new MongoServerAddress("127.0.0.1", 27017),
+            Credential = MongoCredential.CreateCredential("admin", "root", "example")
+        };
+
+        _client = new MongoClient(settings);
+    }
+
+    [GlobalCleanup]
     public void Cleanup()
     {
-        _client.GetDatabase("benchmark").DropCollection("keyvaluecollection");
         _client.Dispose();
     }
 
@@ -52,7 +63,7 @@ public class Mongo : Base
 
     [Benchmark]
     [BenchmarkCategory("read")]
-    public async Task<object?> EvalQueryAsync() => await MainReadLoopAsync(Read);
+    public async Task<object> EvalQueryAsync() => await MainReadLoopAsync(Read);
 
     private async Task Insert(int i, int count)
     {
@@ -78,7 +89,7 @@ public class Mongo : Base
         await _collection.InsertManyAsync(documents);
     }
 
-    private async Task<object?> Read(int i)
+    private async Task<object> Read(int i)
     {
         var filter = Builders<BsonDocument>.Filter.Eq("value", i);
         var cursor = await _collection.FindAsync(filter).ConfigureAwait(false);

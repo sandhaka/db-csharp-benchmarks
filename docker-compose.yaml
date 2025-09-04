@@ -14,6 +14,11 @@ services:
       --wiredTigerCollectionBlockCompressor snappy
       --wiredTigerJournalCompressor snappy
       --wiredTigerEngineConfigString cache_size=1GB
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: '4G'
     volumes:
       - mongodb_data:/data/db
     restart: unless-stopped
@@ -29,6 +34,11 @@ services:
       --smp 2
       --memory 2G
       --overprovisioned 1
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: '4G'
     volumes:
       - scylladb_data:/var/lib/scylla
     restart: unless-stopped

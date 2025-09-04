@@ -14,8 +14,8 @@ public class Scylla : Base
     private const string InsertStatement = "INSERT INTO benchmarkkeyspace.testdata (id, name, value) VALUES (uuid(), ?, ?);";
     private const string ReadStatement = "SELECT * FROM benchmarkkeyspace.testdata WHERE value = ?;";
 
-    [GlobalSetup(Targets = new[] { nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)})]
-    public void Setup()
+    [GlobalSetup(Targets = [nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)])]
+    public void SetupInsert()
     {
         _cluster = Cluster.Builder()
             .AddContactPoint("127.0.0.1")
@@ -47,13 +47,23 @@ public class Scylla : Base
         "));
 
         _is = _session.Prepare(InsertStatement);
+    }
+
+    [GlobalSetup(Targets = [nameof(EvalQueryAsync)])]
+    public void SetupRead()
+    {
+        _cluster = Cluster.Builder()
+            .AddContactPoint("127.0.0.1")
+            .Build();
+
+        _session = _cluster.Connect();
+
         _rs = _session.Prepare(ReadStatement);
     }
 
-    [GlobalCleanup(Targets = new[] {nameof(EvalQueryAsync)})]
+    [GlobalCleanup]
     public void Cleanup()
     {
-        _session.Execute(new SimpleStatement("DROP KEYSPACE IF EXISTS benchmarkkeyspace;"));
         _session.Dispose();
         _cluster.Dispose();
     }
@@ -68,7 +78,7 @@ public class Scylla : Base
 
     [Benchmark]
     [BenchmarkCategory("read")]
-    public async Task<object?> EvalQueryAsync() => await MainReadLoopAsync(Read);
+    public async Task<object> EvalQueryAsync() => await MainReadLoopAsync(Read);
 
     private async Task Insert(int i, int count)
     {
@@ -92,7 +102,7 @@ public class Scylla : Base
         await _session.ExecuteAsync(batch).ConfigureAwait(false);
     }
 
-    private async Task<object?> Read(int i)
+    private async Task<object> Read(int i)
     {
         var bs = _rs.Bind(i).SetIdempotence(true);
         var r = await _session.ExecuteAsync(bs).ConfigureAwait(false);

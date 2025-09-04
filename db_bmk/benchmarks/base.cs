@@ -31,9 +31,9 @@ public abstract class Base
         await Task.WhenAll(tasks).ConfigureAwait(false);
     }
 
-    protected async Task<List<object?>> MainReadLoopAsync(Func<int, Task<object?>> read)
+    protected async Task<List<object>> MainReadLoopAsync(Func<int, Task<object>> read)
     {
-        var tasks = new List<Task<object?>>();
+        var tasks = new List<Task<object>>();
         var maxCount = (int) Math.Ceiling((double)NumQueries / MaxConcurrencyLevel);
         var k = 0;
 
