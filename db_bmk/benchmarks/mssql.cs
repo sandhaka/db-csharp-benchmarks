@@ -7,7 +7,7 @@ namespace db_bmk.benchmarks;
 [MemoryDiagnoser]
 public class MsSQL : Base
 {   
-    private const string ConnectionString = "Data Source=localhost;Persist Security Info=True;Password=Password$4;User ID=sa;Initial Catalog=Board_Local;TrustServerCertificate=true;Encrypt=false;MultipleActiveResultSets=true;";
+    private const string ConnectionString = "Data Source=127.0.0.1;Persist Security Info=True;Password=Password$4;User ID=sa;Initial Catalog=master;TrustServerCertificate=true;Encrypt=false;MultipleActiveResultSets=true;";
     private const string InsertStatement = "INSERT INTO testdata (name, value) VALUES (@name, @value);";
     private const string ReadStatement = "SELECT * FROM testdata WHERE value = @value;";
 
@@ -76,7 +76,7 @@ public class MsSQL : Base
             if (result <= 0) throw new InvalidOperationException("Write failure");
         }
 
-        connection.Close();
+        await connection.CloseAsync().ConfigureAwait(false);
     }
 
     private async Task BulkInsert(int i, int count)
@@ -101,8 +101,7 @@ public class MsSQL : Base
         }
 
         await transaction.CommitAsync().ConfigureAwait(false);
-
-        connection.Close();
+        await connection.CloseAsync().ConfigureAwait(false);
     }
 
     private async Task<object> Read(int i)

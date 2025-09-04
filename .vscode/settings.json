@@ -1,11 +1,11 @@
 {
     "dotnet.defaultSolution": "Benchmarks.sln",
     "omnisharp.enableEditorConfigSupport": true,
-    "omnisharp.enableImportCompletion": true,
     "omnisharp.enableRoslynAnalyzers": true,
     "files.exclude": {
         "**/bin": true,
         "**/obj": true
     },
-    "C_Cpp.intelliSenseEngine": "disabled"
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true
 }

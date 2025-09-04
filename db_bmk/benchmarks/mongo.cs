@@ -10,7 +10,7 @@ public class Mongo : Base
     private IMongoCollection<BsonDocument> _collection;
     private IMongoClient _client;
 
-    [GlobalSetup(Targets = [nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)])]
+    [GlobalSetup(Targets = new[] { nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)})]
     public void SetupInsert()
     {
         var settings = new MongoClientSettings
@@ -45,6 +45,11 @@ public class Mongo : Base
         };
 
         _client = new MongoClient(settings);
+        
+        _collection = _client.GetDatabase("benchmark")
+            .GetCollection<BsonDocument>(
+                "keyvaluecollection"
+            );
     }
 
     [GlobalCleanup]
@@ -93,13 +98,17 @@ public class Mongo : Base
     {
         var filter = Builders<BsonDocument>.Filter.Eq("value", i);
         var cursor = await _collection.FindAsync(filter).ConfigureAwait(false);
-        var document = cursor.FirstOrDefault();
+        var document = await cursor.FirstOrDefaultAsync().ConfigureAwait(false);
+        
         if (document != null)
         {
             var name = document["name"].AsString;
             var value = document["value"].AsInt32;
             return new { name, value };
         }
-        throw new InvalidOperationException($"Value {i} not found");
+        
+        // Debug: Check collection count when value not found
+        var count = await _collection.CountDocumentsAsync(Builders<BsonDocument>.Filter.Empty);
+        throw new InvalidOperationException($"Value {i} not found. Collection has {count} documents.");
     }
 }

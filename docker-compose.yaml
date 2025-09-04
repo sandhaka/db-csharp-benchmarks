@@ -56,7 +56,31 @@ services:
       - mssql_data:/var/opt/mssql
     restart: unless-stopped
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"     # HTTP interface
+      - "9000:9000"     # Native TCP interface
+    environment:
+      CLICKHOUSE_DB: benchmark
+      CLICKHOUSE_SKIP_USER_SETUP: 1
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: '12G' # Need more RAM to avoid out of memory issues on insert
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
 volumes:
   mongodb_data:
   scylladb_data:
   mssql_data:
+  elasticsearch_data:
+  clickhouse_data:

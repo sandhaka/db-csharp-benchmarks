@@ -12,13 +12,20 @@ public class Scylla : Base
     private PreparedStatement _rs;
 
     private const string InsertStatement = "INSERT INTO benchmarkkeyspace.testdata (id, name, value) VALUES (uuid(), ?, ?);";
-    private const string ReadStatement = "SELECT * FROM benchmarkkeyspace.testdata WHERE value = ?;";
+    private const string ReadStatement = "SELECT * FROM benchmarkkeyspace.testdata WHERE value = ? ALLOW FILTERING;";
 
     [GlobalSetup(Targets = [nameof(EvalInsertAsync), nameof(EvalBulkInsertAsync)])]
     public void SetupInsert()
     {
         _cluster = Cluster.Builder()
             .AddContactPoint("127.0.0.1")
+            .WithPoolingOptions(new PoolingOptions()
+                .SetCoreConnectionsPerHost(HostDistance.Local, 2)
+                .SetMaxConnectionsPerHost(HostDistance.Local, 8)
+                .SetMaxSimultaneousRequestsPerConnectionTreshold(HostDistance.Local, 100))
+            .WithQueryOptions(new QueryOptions()
+                .SetConsistencyLevel(ConsistencyLevel.LocalOne)
+                .SetSerialConsistencyLevel(ConsistencyLevel.LocalSerial))
             .Build();
 
         _session = _cluster.Connect();
@@ -32,20 +39,20 @@ public class Scylla : Base
             WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
         "));
 
+        // Table design matching other databases: id as primary key, value as indexed column
         _session.Execute(new SimpleStatement(@"
             CREATE TABLE benchmarkkeyspace.testdata (
                 id UUID PRIMARY KEY,
-                value int,
-                name text
+                name text,
+                value int
             );
         "));
 
-        // Create index on value column for better query performance
+        // Create secondary index on value column for query performance (ScyllaDB specific optimization)
         _session.Execute(new SimpleStatement(@"
             CREATE INDEX IF NOT EXISTS idx_value 
             ON benchmarkkeyspace.testdata (value);
         "));
-
         _is = _session.Prepare(InsertStatement);
     }
 
@@ -54,6 +61,13 @@ public class Scylla : Base
     {
         _cluster = Cluster.Builder()
             .AddContactPoint("127.0.0.1")
+            .WithPoolingOptions(new PoolingOptions()
+                .SetCoreConnectionsPerHost(HostDistance.Local, 2)
+                .SetMaxConnectionsPerHost(HostDistance.Local, 8)
+                .SetMaxSimultaneousRequestsPerConnectionTreshold(HostDistance.Local, 100))
+            .WithQueryOptions(new QueryOptions()
+                .SetConsistencyLevel(ConsistencyLevel.LocalOne)
+                .SetSerialConsistencyLevel(ConsistencyLevel.LocalSerial))
             .Build();
 
         _session = _cluster.Connect();
@@ -84,7 +98,7 @@ public class Scylla : Base
     {
         foreach (var c in Enumerable.Range(i, count))
         {
-            var bs = _is.Bind(string.Empty, c).SetIdempotence(true);
+            var bs = _is.Bind(string.Empty, c);
             await _session.ExecuteAsync(bs).ConfigureAwait(false);
         }
     }
@@ -96,7 +110,7 @@ public class Scylla : Base
 
         foreach (var c in Enumerable.Range(i, count))
         {
-            batch.Add(_is.Bind(string.Empty, c)).SetIdempotence(true);
+            batch.Add(_is.Bind(string.Empty, c));
         }
 
         await _session.ExecuteAsync(batch).ConfigureAwait(false);
@@ -104,8 +118,9 @@ public class Scylla : Base
 
     private async Task<object> Read(int i)
     {
-        var bs = _rs.Bind(i).SetIdempotence(true);
+        var bs = _rs.Bind(i);
         var r = await _session.ExecuteAsync(bs).ConfigureAwait(false);
+        
         var row = r.FirstOrDefault();
         if (row == null)
             throw new InvalidOperationException($"Value {i} not found");
