@@ -4,6 +4,8 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "db_bmk", "db_bmk\db_bmk.csproj", "{7B173A22-8570-05B7-6E63-707B90612317}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "elasticsearch_query_cap", "elasticsearch_query_cap\elasticsearch_query_cap.csproj", "{F8E871E1-AADC-4724-8919-05F78B98013E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,6 +16,10 @@ Global
 		{7B173A22-8570-05B7-6E63-707B90612317}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B173A22-8570-05B7-6E63-707B90612317}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B173A22-8570-05B7-6E63-707B90612317}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E871E1-AADC-4724-8919-05F78B98013E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E871E1-AADC-4724-8919-05F78B98013E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E871E1-AADC-4724-8919-05F78B98013E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E871E1-AADC-4724-8919-05F78B98013E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
