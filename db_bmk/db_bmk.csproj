@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
     <PackageReference Include="ClickHouse.Driver" Version="0.7.20" />
+    <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.19.5" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
     <PackageReference Include="MongoDB.Driver" Version="3.4.3" />
     <PackageReference Include="ScyllaDBCSharpDriver" Version="3.22.0.1" />

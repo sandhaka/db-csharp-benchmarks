@@ -107,8 +107,6 @@ public class Mongo : Base
             return new { name, value };
         }
         
-        // Debug: Check collection count when value not found
-        var count = await _collection.CountDocumentsAsync(Builders<BsonDocument>.Filter.Empty);
-        throw new InvalidOperationException($"Value {i} not found. Collection has {count} documents.");
+        throw new InvalidOperationException($"Value {i} not found.");
     }
 }
