@@ -14,10 +14,11 @@ internal class Program
             .WithOrderer(DefaultOrderer.Instance); // Maintains method declaration order
 
         // Run benchmarks in order: Insert tests first, then Read tests
-        // BenchmarkRunner.Run<MsSQL>(config);
-        // BenchmarkRunner.Run<Scylla>(config);
-        // BenchmarkRunner.Run<Mongo>(config);
-        // BenchmarkRunner.Run<ClickHouseDB>(config);
+        BenchmarkRunner.Run<MsSQL>(config);
+        BenchmarkRunner.Run<Scylla>(config);
+        BenchmarkRunner.Run<Mongo>(config);
+        BenchmarkRunner.Run<ClickHouseDB>(config);
         BenchmarkRunner.Run<Elasticsearch>(config);
     }
+
 }
