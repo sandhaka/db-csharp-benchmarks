@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
 
   elasticsearch:
-    image: elasticsearch:8.19.3
+    image: elasticsearch:9.1.3
     container_name: elasticsearch
     ports:
       - "9200:9200"     # REST API
@@ -68,6 +68,8 @@ services:
       - xpack.security.enrollment.enabled=false
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - bootstrap.memory_lock=true
+      - http.cors.enabled=true
+      - http.cors.allow-origin=http://localhost:8080
     deploy:
       resources:
         limits:
@@ -83,6 +85,17 @@ services:
       nofile:
         soft: 65536
         hard: 65536
+
+  elasticvue:
+    image: cars10/elasticvue
+    container_name: elasticvue
+    ports:
+      - "8080:8080"
+    depends_on:
+      - elasticsearch
+    environment:
+      ELASTICVUE_DEFAULT_URL: http://elasticsearch:9200
+    restart: unless-stopped
 
   clickhouse:
     image: clickhouse/clickhouse-server:latest
