@@ -23,6 +23,25 @@ services:
       - mongodb_data:/data/db
     restart: unless-stopped
 
+  mongoexpress:
+    image: mongo-express
+    container_name: mongoexpress
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ENABLE_ADMIN: "true"
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+      ME_CONFIG_REQUEST_SIZE: 100kb
+      ME_CONFIG_OPTIONS_EDITORTHEME: default
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
   scylladb:
     image: scylladb/scylla:latest
     container_name: scylladb
